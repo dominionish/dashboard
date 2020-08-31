@@ -4,22 +4,27 @@ class SystemEmitter {
     private eventEmitter: EventEmitter;
     private timerId?: NodeJS.Timeout | null;
     private systemType: symbol;
+    private canTimerBeRun: boolean;
 
     constructor(systemType: symbol, callback: (value: string) => void) {
+        this.canTimerBeRun = true;
         this.timerId = null;
         this.systemType = systemType;
         this.eventEmitter = new EventEmitter();
 
-        this.eventEmitter.on(systemType, (value) => {
+        this.eventEmitter.on(systemType, (value: string) => {
             callback(value);
         })
     }
 
-    public start = () => {
+    public start = (): void => {
+        this.canTimerBeRun = true;
         this.timerId = this.runRandomGenerator();
     }
 
-    public stop = () => {
+    public stop = (): void => {
+        this.canTimerBeRun = false;
+
         if (!this.timerId) {
             return;
         }
@@ -31,22 +36,24 @@ class SystemEmitter {
     private runRandomGenerator = (): NodeJS.Timeout => {
         return setTimeout(
             () => {
-                this.eventEmitter.emit(this.systemType, this.getRandomString())
-                this.start()
+                this.eventEmitter.emit(this.systemType, this.getRandomString());
+                if (this.canTimerBeRun) {
+                    this.start()
+                }
             },
             this.getRandomDelay()
         )
     }
 
-    private getRandomString = () => {
+    private getRandomString = (): string => {
         return this.getRandomInt(0, 100).toString();
     }
 
-    private getRandomDelay = () => {
+    private getRandomDelay = (): number => {
         return this.getRandomInt(100, 2000);
     }
 
-    private getRandomInt = (min: number, max: number) => {
+    private getRandomInt = (min: number, max: number): number => {
         return Math.floor(Math.random() * Math.floor(max)) + min;
     }
 }

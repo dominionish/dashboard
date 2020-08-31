@@ -25,6 +25,7 @@ class UniqueObservable {
 
     public unsubscribe = () => {
         this.emittersArray.forEach((emitter) => emitter.stop);
+        this.emittersArray = [];
 
         for (const [, timerId] of Object.entries(this.timerDict)) {
             if (timerId) {
